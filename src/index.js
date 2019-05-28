@@ -30,7 +30,7 @@ export default api => {
   function getCtx(url, args = {}) {
     debug(`get url ${url}`);
 
-    const ctx = getParsedData(url, replacePortalConfig);
+    const ctx = getParsedData(url);
     if (!ctx.isLocal) {
       const blocksTempPath = makeSureMaterialsTempPathExist(args.dryRun);
       const templateTmpDirPath = join(blocksTempPath, ctx.id);
@@ -106,7 +106,12 @@ export default api => {
     // 1. parse url and args
     spinner.start('Parse url and args');
     const url = args._[1] || replacePortalConfig.url;
-    assert(url, `run ${chalk.cyan.underline('umi help replace-portal')} to checkout the usage`);
+    assert(
+      url,
+      `run ${chalk.cyan.underline(
+        'umi help replace-portal'
+      )} to checkout the usage, replace-portal config is ${replacePortalConfig}`
+    );
 
     const useYarn = existsSync(join(paths.cwd, 'yarn.lock'));
     const defaultNpmClient = blockConfig.npmClient || (useYarn ? 'yarn' : 'npm');
