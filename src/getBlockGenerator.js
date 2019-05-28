@@ -6,7 +6,7 @@ import crequire from 'crequire';
 import Mustache from 'mustache';
 import upperCamelCase from 'uppercamelcase';
 import replaceContent from './replaceContent';
-import { SINGULAR_SENSLTIVE } from '../../../constants';
+import { SINGULAR_SENSLTIVE } from './constants';
 
 const debug = require('debug')('umi-build-dev:getBlockGenerator');
 
