@@ -11,7 +11,7 @@ import { dependenciesConflictCheck, getNameFromPkg, getAllBlockDependencies } fr
 
 export default api => {
   const { log, paths, debug, applyPlugins, config } = api;
-  const replacePortalConfig = config['portal'] || {};
+  const replacePortalConfig = config['replacePortal'] || {};
 
   debug(`replace-portal ${replacePortalConfig}`);
 
@@ -354,9 +354,9 @@ Examples:
   api._registerConfig(() => {
     return () => {
       return {
-        name: 'portal',
+        name: 'replacePortal',
         validate(val) {
-          assert(isPlainObject(val), `Configure item block should be Plain Object, but got ${val}.`);
+          assert(isPlainObject(val), `Configure item replace portal should be Plain Object, but got ${val}.`);
         }
       };
     };
