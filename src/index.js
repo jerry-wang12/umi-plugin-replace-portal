@@ -114,7 +114,7 @@ export default api => {
     );
 
     const useYarn = existsSync(join(paths.cwd, 'yarn.lock'));
-    const defaultNpmClient = blockConfig.npmClient || (useYarn ? 'yarn' : 'npm');
+    const defaultNpmClient = replacePortalConfig.npmClient || (useYarn ? 'yarn' : 'npm');
     debug(`defaultNpmClient: ${defaultNpmClient}`);
     debug(`args: ${JSON.stringify(args)}`);
     const { path, npmClient = defaultNpmClient, dryRun, skipDependencies, updateRoutes } = args;
