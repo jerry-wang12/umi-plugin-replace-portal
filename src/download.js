@@ -31,13 +31,13 @@ export function downloadFromGit(url, id, branch = 'master', log, args = {}) {
       log.log(`dryRun is true, skip git pull`);
     } else {
       spawnSync('git', ['fetch'], {
-        cwd: templateTmpDirPath,
+        cwd: templateTmpDirPath
       });
       spawnSync('git', ['checkout', branch], {
-        cwd: templateTmpDirPath,
+        cwd: templateTmpDirPath
       });
       spawnSync('git', ['pull'], {
-        cwd: templateTmpDirPath,
+        cwd: templateTmpDirPath
       });
     }
   } else {
@@ -48,7 +48,7 @@ export function downloadFromGit(url, id, branch = 'master', log, args = {}) {
       log.log(`dryRun is true, skip git clone`);
     } else {
       spawnSync('git', ['clone', url, id, '--single-branch', '-b', branch], {
-        cwd: blocksTempPath,
+        cwd: blocksTempPath
       });
     }
   }
@@ -81,33 +81,29 @@ export function parseGitUrl(url) {
     // eslint-disable-next-line
     allpath,
     branch = 'master',
-    path = '/',
+    path = '/'
   ] = gitSiteParser.exec(url);
   return {
     repo: `${protocol}${host}${divide}${group}/${name}.git`,
     branch,
     path,
-    id: `${host}/${group}/${name}`, // 唯一标识一个 git 仓库
+    id: `${host}/${group}/${name}` // 唯一标识一个 git 仓库
   };
 }
 
-export function getParsedData(url, blockConfig) {
+export function getParsedData(url) {
   debug(`url: ${url}`);
   let realUrl;
-  const defaultGitUrl = blockConfig.defaultGitUrl || 'https://github.com/umijs/umi-blocks';
   if (isGitUrl(url)) {
     realUrl = url;
     debug('is git url');
-  } else if (/^[\w]+[\w\-\/]*$/.test(url)) {
-    realUrl = `${defaultGitUrl}/tree/master/${url}`;
-    debug(`will use ${realUrl} as the block url`);
   } else if (/^[\.\/]/.test(url)) {
     // locale path for test
     const sourcePath = resolve(process.cwd(), url);
     debug(`will use ${sourcePath} as the block url`);
     return {
       isLocal: true,
-      sourcePath,
+      sourcePath
     };
   } else {
     throw new Error(`${url} can't match any pattern`);

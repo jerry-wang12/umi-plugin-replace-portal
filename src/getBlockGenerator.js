@@ -1,12 +1,10 @@
-import { existsSync, readdirSync, statSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
-import mkdirp from 'mkdirp';
 import semver from 'semver';
 import crequire from 'crequire';
-import Mustache from 'mustache';
 import upperCamelCase from 'uppercamelcase';
 import replaceContent from './replaceContent';
-import { SINGULAR_SENSLTIVE } from './constants';
+import { COVER_FOLDERS, SINGULAR_SENSLTIVE } from './constants';
 
 const debug = require('debug')('umi-build-dev:getBlockGenerator');
 
@@ -57,7 +55,7 @@ export function getAllBlockDependencies(rootDir, pkg) {
     const rubBlockDeps = getAllBlockDependencies(
       rootDir,
       // eslint-disable-next-line
-      require(join(rootDir, block, 'package.json')),
+      require(join(rootDir, block, 'package.json'))
     );
     mergeDependencies(allDependencies, rubBlockDeps);
   });
@@ -69,7 +67,7 @@ export function dependenciesConflictCheck(
   blockPkgDeps = {},
   projectPkgDeps = {},
   blockPkgDevDeps = {},
-  projectPkgAllDeps = {},
+  projectPkgAllDeps = {}
 ) {
   const [lacks, conflicts] = checkConflict(blockPkgDeps, projectPkgDeps);
   const [devLacks, devConflicts] = checkConflict(blockPkgDevDeps, projectPkgAllDeps);
@@ -77,14 +75,14 @@ export function dependenciesConflictCheck(
     conflicts,
     lacks,
     devConflicts,
-    devLacks,
+    devLacks
   };
 }
 
 export function getMockDependencies(mockContent, blockPkg) {
   const allDependencies = {
     ...blockPkg.devDependencies,
-    ...blockPkg.dependencies,
+    ...blockPkg.dependencies
   };
   const deps = {};
   try {
@@ -117,8 +115,7 @@ export function getSingularName(name) {
 }
 
 export default api => {
-  const { paths, Generator, config, applyPlugins, findJS } = api;
-  const blockConfig = config.block || {};
+  const { paths, Generator, config, applyPlugins } = api;
 
   return class BlockGenerator extends Generator {
     constructor(args, opts) {
@@ -139,34 +136,13 @@ export default api => {
     }
 
     async writing() {
-      let targetPath = join(paths.absPagesPath, this.path);
-      debug(`get targetPath ${targetPath}`);
-      // for old page block check for duplicate path
-      // if there is, prompt for input a new path
-      while (this.isPageBlock && existsSync(targetPath)) {
-        // eslint-disable-next-line no-await-in-loop
-        this.path = (await this.prompt({
-          type: 'input',
-          name: 'path',
-          message: `path ${this.path} already exist, press input a new path for it`,
-          required: true,
-          default: this.path,
-        })).path;
-        // fix demo => /demo
-        if (!/^\//.test(this.path)) {
-          this.path = `/${this.path}`;
-        }
-        targetPath = join(paths.absPagesPath, this.path);
-        debug(`targetPath exist get new targetPath ${targetPath}`);
-      }
-
       const blockPath = this.path;
 
       applyPlugins('beforeBlockWriting', {
         args: {
           sourcePath: this.sourcePath,
-          blockPath,
-        },
+          blockPath
+        }
       });
 
       if (this.dryRun) {
@@ -174,74 +150,12 @@ export default api => {
         return;
       }
 
-      // check for duplicate block name under the path
-      // if there is, prompt for a new block name
-      while (!this.isPageBlock && existsSync(join(targetPath, this.blockFolderName))) {
-        // eslint-disable-next-line no-await-in-loop
-        this.blockFolderName = (await this.prompt({
-          type: 'input',
-          name: 'path',
-          message: `block with name ${
-            this.blockFolderName
-          } already exist, please input a new name for it`,
-          required: true,
-          default: this.blockFolderName,
-        })).path;
-        // if (!/^\//.test(blockFolderName)) {
-        //   blockFolderName = `/${blockFolderName}`;
-        // }
-        debug(`blockFolderName exist get new blockFolderName ${this.blockFolderName}`);
-      }
-
-      // create container
-      this.entryPath = findJS(targetPath, 'index');
-      if (!this.entryPath) {
-        this.entryPath = join(targetPath, `index.${this.isTypeScript ? 'tsx' : 'js'}`);
-      }
-
-      if (!this.isPageBlock && !existsSync(this.entryPath)) {
-        const confirmResult = (await this.prompt({
-          type: 'confirm',
-          name: 'needCreate',
-          message: `Not find a exist page file at ${
-            this.path
-          }. Do you want to create it and import this block.`,
-        })).needCreate;
-
-        if (!confirmResult) {
-          throw new Error('You stop it!');
-        }
-
-        debug('start to generate the entry file for block(s) under the path...');
-
-        this.needCreateNewRoute = true;
-        const blockEntryTpl = readFileSync(
-          blockConfig.entryTemplatePath || paths.defaultBlockEntryTplPath,
-          'utf-8',
-        );
-        const tplContent = {
-          blockEntryName: `${this.path.slice(1)}Container`,
-        };
-        const entry = Mustache.render(blockEntryTpl, tplContent);
-        mkdirp.sync(targetPath);
-        writeFileSync(this.entryPath, entry);
-      }
-
       // copy block to target
       // you can find the copy api detail in https://github.com/SBoudrias/mem-fs-editor/blob/master/lib/actions/copy.js
       debug('start copy block file to your project...');
-      ['src', '@'].forEach(folder => {
-        if (!this.isPageBlock && folder === '@') {
-          // @ folder not support anymore in new specVersion
-          return;
-        }
+      COVER_FOLDERS.forEach(folder => {
         const folderPath = join(this.sourcePath, folder);
-        let targetFolder;
-        if (this.isPageBlock) {
-          targetFolder = folder === 'src' ? targetPath : paths.absSrcPath;
-        } else {
-          targetFolder = join(targetPath, this.blockFolderName);
-        }
+        const targetFolder = paths.absSrcPath;
         const options = {
           process(content, targetPath) {
             content = String(content);
@@ -249,16 +163,16 @@ export default api => {
               content = parseContentToSingular(content);
             }
             content = replaceContent(content, {
-              path: blockPath,
+              path: blockPath
             });
             return applyPlugins('_modifyBlockFile', {
               initialValue: content,
               args: {
                 blockPath,
-                targetPath,
-              },
+                targetPath
+              }
             });
-          },
+          }
         };
         if (existsSync(folderPath)) {
           readdirSync(folderPath).forEach(name => {
@@ -267,6 +181,7 @@ export default api => {
               return;
             }
             const thePath = join(folderPath, name);
+            // 单数形式目录的转换
             if (statSync(thePath).isDirectory() && config.singular) {
               // @/components/ => @/src/component/ and ./components/ => ./component etc.
               name = getSingularName(name);
@@ -276,8 +191,8 @@ export default api => {
               args: {
                 source: thePath,
                 blockPath,
-                sourceName: name,
-              },
+                sourceName: name
+              }
             });
             debug(`copy ${thePath} to ${realTarget}`);
             this.fs.copy(thePath, realTarget, options);
