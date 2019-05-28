@@ -6,7 +6,7 @@
     "name": "jerry",
     "email": "463174595@qq.com"
   },
-  "repository": "/umi-plugin-replace-portal",
+  "repository": "https://github.com/jerry-wang12/umi-plugin-replace-portal",
   "peerDependencies": {
     "umi": "2.x"
   },
