@@ -11,7 +11,7 @@ import { dependenciesConflictCheck, getNameFromPkg, getAllBlockDependencies } fr
 
 export default api => {
   const { log, paths, debug, applyPlugins, config } = api;
-  const replacePortalConfig = config['replace-portal'] || {};
+  const replacePortalConfig = config['portal'] || {};
 
   debug(`replace-portal ${replacePortalConfig}`);
 
@@ -110,7 +110,7 @@ export default api => {
       url,
       `run ${chalk.cyan.underline(
         'umi help replace-portal'
-      )} to checkout the usage, replace-portal config is ${JSON.stringify(config, null, 2)}`
+      )} to checkout the usage, replace-portal config is ${JSON.stringify(replacePortalConfig, null, 2)}`
     );
 
     const useYarn = existsSync(join(paths.cwd, 'yarn.lock'));
