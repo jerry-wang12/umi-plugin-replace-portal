@@ -154,7 +154,7 @@ export default api => {
       // you can find the copy api detail in https://github.com/SBoudrias/mem-fs-editor/blob/master/lib/actions/copy.js
       debug('start copy block file to your project...');
       COVER_FOLDERS.forEach(folder => {
-        const folderPath = join(this.sourcePath, folder);
+        const folderPath = join(this.sourcePath, 'src', folder);
         const targetFolder = paths.absSrcPath;
         const options = {
           process(content, targetPath) {

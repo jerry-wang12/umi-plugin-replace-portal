@@ -18,8 +18,8 @@ export default api => {
   async function block(args = {}) {
     let retCtx;
     switch (args._[0]) {
-      case 'cover':
-        retCtx = await cover(args);
+      case 'pull':
+        retCtx = await pull(args);
         break;
       default:
         throw new Error(`Please run ${chalk.cyan.underline('umi help replace-portal')} to checkout the usage`);
@@ -100,7 +100,7 @@ export default api => {
     spinner.succeed();
   }
 
-  async function cover(args = {}) {
+  async function pull(args = {}) {
     const spinner = ora();
 
     // 1. parse url and args
@@ -271,27 +271,27 @@ export default api => {
     spinner.succeed('Generate files');
 
     // 6. write routes
-    if (generator.needCreateNewRoute && api.config.routes && !skipModifyRoutes) {
-      spinner.start(`Write route ${generator.path} to ${api.service.userConfig.file}`);
-      // 当前 _modifyBlockNewRouteConfig 只支持配置式路由
-      // 未来可以做下自动写入注释配置，支持约定式路由
-      const newRouteConfig = applyPlugins('_modifyBlockNewRouteConfig', {
-        initialValue: {
-          path: generator.path.toLowerCase(),
-          component: `.${generator.path}`,
-          ...(isLayout ? { routes: [] } : {})
-        }
-      });
-      try {
-        if (!dryRun) {
-          writeNewRoute(newRouteConfig, api.service.userConfig.file, paths.absSrcPath);
-        }
-      } catch (e) {
-        spinner.fail();
-        throw new Error(e);
-      }
-      spinner.succeed();
-    }
+    // if (generator.needCreateNewRoute && api.config.routes && !skipModifyRoutes) {
+    //   spinner.start(`Write route ${generator.path} to ${api.service.userConfig.file}`);
+    //   // 当前 _modifyBlockNewRouteConfig 只支持配置式路由
+    //   // 未来可以做下自动写入注释配置，支持约定式路由
+    //   const newRouteConfig = applyPlugins('_modifyBlockNewRouteConfig', {
+    //     initialValue: {
+    //       path: generator.path.toLowerCase(),
+    //       component: `.${generator.path}`,
+    //       ...(isLayout ? { routes: [] } : {})
+    //     }
+    //   });
+    //   try {
+    //     if (!dryRun) {
+    //       writeNewRoute(newRouteConfig, api.service.userConfig.file, paths.absSrcPath);
+    //     }
+    //   } catch (e) {
+    //     spinner.fail();
+    //     throw new Error(e);
+    //   }
+    //   spinner.succeed();
+    // }
 
     // 6. import block to container
     // if (!generator.isPageBlock) {
@@ -319,7 +319,7 @@ export default api => {
 
 Commands:
 
-  ${chalk.cyan(`cover `)}     cover the protal files to your project
+  ${chalk.cyan(`pull `)}     pull the protal files to your project
 
 Options for the ${chalk.cyan(`add`)} command:
 
@@ -334,18 +334,18 @@ Options for the ${chalk.cyan(`add`)} command:
 
 Examples:
 
-  ${chalk.gray(`# cover portal with full url`)}
-  umi replace-portal cover https://github.com/umijs/umi-blocks/tree/master/demo
+  ${chalk.gray(`# pull portal with full url`)}
+  umi replace-portal pull https://github.com/umijs/umi-blocks/tree/master/demo
 
   ${chalk.gray(`# Add block with specified route path`)}
-  umi replace-portal cover /Users/wangxianxi/Documents/gitlab/
+  umi replace-portal pull /Users/wangxianxi/Documents/gitlab/
 
   `.trim();
 
   api.registerCommand(
     'replace-portal',
     {
-      description: 'replace-portal related commands, e.g. cover',
+      description: 'replace-portal related commands, e.g. pull',
       usage: `umi replace-portal <command>`,
       details
     },
