@@ -1,4 +1,4 @@
-# umi-plugin-umi-plugin-replace-portal
+# umi-plugin-replace-portal
 
 [![NPM version](https://img.shields.io/npm/v/umi-plugin-replace-portal.svg?style=flat)](https://npmjs.org/package/umi-plugin-replace-portal)
 [![NPM downloads](http://img.shields.io/npm/dm/umi-plugin-replace-portal.svg?style=flat)](https://npmjs.org/package/umi-plugin-replace-portal)
