@@ -354,7 +354,7 @@ Examples:
   api._registerConfig(() => {
     return () => {
       return {
-        name: 'replace-portal',
+        name: 'portal',
         validate(val) {
           assert(isPlainObject(val), `Configure item block should be Plain Object, but got ${val}.`);
         }
