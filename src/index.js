@@ -110,7 +110,7 @@ export default api => {
       url,
       `run ${chalk.cyan.underline(
         'umi help replace-portal'
-      )} to checkout the usage, replace-portal config is ${replacePortalConfig}`
+      )} to checkout the usage, replace-portal config is ${config}`
     );
 
     const useYarn = existsSync(join(paths.cwd, 'yarn.lock'));
