@@ -3,7 +3,6 @@ import { join } from 'path';
 import semver from 'semver';
 import crequire from 'crequire';
 import upperCamelCase from 'uppercamelcase';
-import replaceContent from './replaceContent';
 import { COVER_FOLDERS, SINGULAR_SENSLTIVE } from './constants';
 
 const debug = require('debug')('umi-build-dev:getBlockGenerator');
@@ -125,8 +124,6 @@ export default api => {
       this.dryRun = opts.dryRun;
       this.path = opts.path;
       this.blockName = opts.blockName;
-      this.isPageBlock = opts.isPageBlock;
-      this.needCreateNewRoute = this.isPageBlock;
       this.blockFolderName = upperCamelCase(this.blockName);
       this.entryPath = null;
 
@@ -155,16 +152,13 @@ export default api => {
       debug('start copy block file to your project...');
       COVER_FOLDERS.forEach(folder => {
         const folderPath = join(this.sourcePath, 'src', folder);
-        const targetFolder = paths.absSrcPath;
+        const targetFolder = join(paths.absSrcPath, folder);
         const options = {
           process(content, targetPath) {
             content = String(content);
             if (config.singular) {
               content = parseContentToSingular(content);
             }
-            content = replaceContent(content, {
-              path: blockPath
-            });
             return applyPlugins('_modifyBlockFile', {
               initialValue: content,
               args: {

@@ -11,9 +11,9 @@ import { dependenciesConflictCheck, getNameFromPkg, getAllBlockDependencies } fr
 
 export default api => {
   const { log, paths, debug, applyPlugins, config } = api;
-  const blockConfig = config['replace-portal'] || {};
+  const replacePortalConfig = config['replace-portal'] || {};
 
-  debug(`replace-portal ${blockConfig}`);
+  debug(`replace-portal ${replacePortalConfig}`);
 
   async function block(args = {}) {
     let retCtx;
@@ -30,7 +30,7 @@ export default api => {
   function getCtx(url, args = {}) {
     debug(`get url ${url}`);
 
-    const ctx = getParsedData(url, blockConfig);
+    const ctx = getParsedData(url, replacePortalConfig);
     if (!ctx.isLocal) {
       const blocksTempPath = makeSureMaterialsTempPathExist(args.dryRun);
       const templateTmpDirPath = join(blocksTempPath, ctx.id);
@@ -105,22 +105,14 @@ export default api => {
 
     // 1. parse url and args
     spinner.start('Parse url and args');
-    const url = args._[1];
+    const url = args._[1] || replacePortalConfig.url;
     assert(url, `run ${chalk.cyan.underline('umi help replace-portal')} to checkout the usage`);
 
     const useYarn = existsSync(join(paths.cwd, 'yarn.lock'));
     const defaultNpmClient = blockConfig.npmClient || (useYarn ? 'yarn' : 'npm');
     debug(`defaultNpmClient: ${defaultNpmClient}`);
     debug(`args: ${JSON.stringify(args)}`);
-    const {
-      path,
-      npmClient = defaultNpmClient,
-      dryRun,
-      skipDependencies,
-      skipModifyRoutes,
-      wrap: isWrap,
-      layout: isLayout
-    } = args;
+    const { path, npmClient = defaultNpmClient, dryRun, skipDependencies, updateRoutes } = args;
     const ctx = getCtx(url);
     spinner.succeed();
 
@@ -245,17 +237,10 @@ export default api => {
     spinner.start(`Generate files`);
     spinner.stopAndPersist();
     const BlockGenerator = require('./getBlockGenerator').default(api);
-    let isPageBlock = ctx.pkg.blockConfig && ctx.pkg.blockConfig.specVersion === '0.1';
-    if (isWrap !== undefined) {
-      // when user use `umi block add --direct`
-      isPageBlock = !isWrap;
-    }
-    debug(`isPageBlock: ${isPageBlock}`);
     const generator = new BlockGenerator(args._.slice(2), {
       sourcePath: ctx.sourcePath,
       path: ctx.routePath,
       blockName: getNameFromPkg(ctx.pkg),
-      isPageBlock,
       dryRun,
       env: {
         cwd: api.cwd
@@ -271,7 +256,7 @@ export default api => {
     spinner.succeed('Generate files');
 
     // 6. write routes
-    // if (generator.needCreateNewRoute && api.config.routes && !skipModifyRoutes) {
+    // if (api.config.routes && updateRoutes) {
     //   spinner.start(`Write route ${generator.path} to ${api.service.userConfig.file}`);
     //   // 当前 _modifyBlockNewRouteConfig 只支持配置式路由
     //   // 未来可以做下自动写入注释配置，支持约定式路由
@@ -327,12 +312,16 @@ Options for the ${chalk.cyan(`add`)} command:
   ${chalk.green(`--branch            `)} git branch
   ${chalk.green(`--npm-client        `)} the npm client, default npm or yarn (if has yarn.lock)
   ${chalk.green(`--skip-dependencies `)} don't install dependencies
-  ${chalk.green(`--skip-modify-routes`)} don't modify the routes
+  ${chalk.green(`--update-routes     `)} update the routes
   ${chalk.green(`--dry-run           `)} for test, don't install dependencies and download
   ${chalk.green(`--no-wrap           `)} add the block to a independent directory
   ${chalk.green(`--layout            `)} add as a layout block (add route with empty children)
 
 Examples:
+
+  ${chalk.gray(`# pull portal by config url`)}
+  # config.js
+  umi replace-portal pull
 
   ${chalk.gray(`# pull portal with full url`)}
   umi replace-portal pull https://github.com/umijs/umi-blocks/tree/master/demo
